@@ -1,0 +1,730 @@
+#!/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/py3/bin/python3
+import sys
+import argparse
+
+
+def _qccontrol():
+    import scatQcControl
+    scatQcControl.main()
+
+
+def _clustering():
+    import scatClustering
+    scatClustering.main()
+
+
+def _annotation():
+    import scatAnnotation
+    scatAnnotation.main()
+
+
+def _enrichment():
+    import scatEnrichment
+    scatEnrichment.main()
+
+
+def _trajectory():
+    import scatTrajectory
+    scatTrajectory.main()
+
+
+def _deconvolute():
+    import scatDeconvSpot
+    scatDeconvSpot.main()
+
+
+def _tf():
+    import scatTFregulon
+    scatTFregulon.main()
+
+
+def _cci():
+    import scatCellCellInteraction
+    scatCellCellInteraction.main()
+
+
+def _sccatch():
+    import scatAnnotscCATCH
+    scatAnnotscCATCH.main()
+
+
+def _spatialcluster():
+    import scatSpatialCluster
+    scatSpatialCluster.main()
+
+
+def _spatialpattern():
+    import scatSpatialPatternGene
+    scatSpatialPatternGene.main()
+
+
+description = "Description:\n\n" + "SCAT allows you to perform Single-cell and spatial transcriptomics analysis"
+
+parser = argparse.ArgumentParser(description=description, prog='ScAT')
+
+subparsers = parser.add_subparsers(help='sub-command help')
+
+# create the parser for the "QcControl" commond
+qc_parser = subparsers.add_parser('QcControl', help='Perform QC Control by Seurat')
+
+qc_parser.add_argument(
+    '-r', '--Rscript',
+    dest='Rscript',
+    type=str,
+    default="/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript",
+    help='Rscript path (default: %(default)s)')
+
+qc_parser.add_argument(
+    '-i', '--input',
+    dest='input',
+    type=str,
+    required=True,
+    default=None,
+    help='input Stereo-seq *.gem; 10X single cell directory; raw_matrix.txt.gz; raw_seuratObj.rds filename')
+
+qc_parser.add_argument(
+    '-o', '--out',
+    dest='out',
+    type=str,
+    required=True,
+    default=None,
+    help='Directory to save file')
+
+qc_parser.add_argument(
+    '-b', '--binsize',
+    dest='binsize',
+    type=int,
+    default=1,
+    help='bin size to binning, your input should be in binSize1 if you set this (default %(default)s)')
+
+qc_parser.add_argument(
+    '--geneColumn',
+    dest='geneColumn',
+    type=int,
+    default=2,
+    help='Specify which column of genes.tsv or features.tsv to use for gene names (default %(default)s)')
+
+qc_parser.add_argument(
+    '--fileType',
+    dest='fileType',
+    type=str,
+    default='gem',
+    choices=('gem', 'matrix'),
+    help='Set as matrix to support *.matrix.txt.gz, otherwise, no need to change (default %(default)s)')
+
+qc_parser.add_argument(
+    '--ptsize',
+    dest='ptsize',
+    type=float,
+    default=1,
+    help='point size for spatial dim plot (default %(default)s)')
+
+qc_parser.add_argument(
+    '--prefix',
+    dest='prefix',
+    type=str,
+    default='sample',
+    help='sample ID, will be used as output prefix and seurat object ident (default %(default)s)')
+
+qc_metrics = qc_parser.add_argument_group("QC metrics")
+qc_metrics.add_argument(
+    '--mtPattern',
+    dest='mtPattern',
+    type=str,
+    default='^MT-',
+    help='mitochondria gene pattern (default %(default)s)')
+
+qc_metrics.add_argument(
+    '--rbPattern',
+    dest='rbPattern',
+    type=str,
+    default='^RP[SL]',
+    help='ribosome gene pattern (default %(default)s)')
+
+qc_metrics.add_argument(
+    '--hbPattern',
+    dest='hbPattern',
+    type=str,
+    default='^HB[^(P)]',
+    help='hemoglobin gene pattern (default %(default)s)')
+
+qc_metrics.add_argument(
+    '--platPattern',
+    dest='platPattern',
+    type=str,
+    default='PECAM1|PF4',
+    help='platelet gene pattern (default %(default)s)')
+
+filter_module = qc_parser.add_argument_group("Filter module")
+filter_module.add_argument(
+    '--mFilter',
+    dest='mFilter',
+    action='store_true',
+    default=False,
+    help='Add "--mTop_markers" to allow filteration (default: %(default)s)')
+
+filter_module.add_argument(
+    '--minCount',
+    dest='minCount',
+    type=int,
+    default=0,
+    help='minimum UMI number per cell/BIN [default %(default)s]')
+
+filter_module.add_argument(
+    '--maxCount',
+    dest='maxCount',
+    type=int,
+    default=1000000,
+    help='maximum UMI number per cell/BIN [default %(default)s]')
+
+filter_module.add_argument(
+    '--minFeature',
+    dest='minFeature',
+    type=int,
+    default=0,
+    help='minimum feature number per cell/BIN [default %(default)s]')
+
+filter_module.add_argument(
+    '--maxFeature',
+    dest='maxFeature',
+    type=int,
+    default=100000,
+    help='maximum feature number per cell/BIN [default %(default)s]')
+
+filter_module.add_argument(
+    '--minCell',
+    dest='minCell',
+    type=int,
+    default=3,
+    help='minimum cell or BIN number express the gene (for genes filterationn) (default %(default)s)')
+
+filter_module.add_argument(
+    '--mtRatio',
+    dest='mtRatio',
+    type=float,
+    default=100,
+    help='maximum mitochondria gene UMI ratio per cell/BIN (default %(default)s)')
+
+filter_module.add_argument(
+    '--rbRatio',
+    dest='rbRatio',
+    type=float,
+    default=100,
+    help='maximum ribosome gene UMI ratio per cell/BIN (default %(default)s)')
+
+filter_module.add_argument(
+    '--hbRatio',
+    dest='hbRatio',
+    type=float,
+    default=100,
+    help='maximum hemoglobin gene UMI ratio per cell/BIN (default %(default)s)')
+
+filter_module.add_argument(
+    '--platRatio',
+    dest='platRatio',
+    type=float,
+    default=100,
+    help='maximum platelet gene UMI ratio per cell/BIN (default %(default)s)')
+
+# create the parser for the "Clustering" commond
+clustering_parser = subparsers.add_parser(
+    'Clustering', help='Perform cell clustering by Seurat')
+clustering_parser.add_argument(
+    '-r', '--Rscript',
+    dest='Rscript',
+    type=str,
+    default="/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript",
+    help='Rscript path (default: %(default)s)')
+
+clustering_parser.add_argument(
+    '-i', '--input',
+    dest='input',
+    type=str,
+    required=True,
+    default=None,
+    help='Input *.txt.gz filename')
+
+clustering_parser.add_argument(
+    '-o', '--out',
+    dest='out',
+    type=str,
+    required=True,
+    default=None,
+    help='Directory to save file')
+
+clustering_parser.add_argument(
+    '--prefix',
+    type=str,
+    default='sample',
+    help='Sample ID, will be used as output prefix and seuratObj ident (default: %(default)s)')
+
+clustering_parser.add_argument(
+    '--pc',
+    type=int,
+    default=30,
+    choices=range(20, 50),
+    help='PCA dimensionality for clustering. (default: %(default)s)')
+
+clustering_parser.add_argument(
+    '--resolution',
+    type=float,
+    default=0.8,
+    help='Resolution for clustering, use a value above (below) 1.0 if you want obtain a larger (smaller) number of communities. (default: %(default)s)')
+
+clustering_parser.add_argument(
+    '--ptsize',
+    type=float,
+    default=1,
+    help='Point size for spatil dim plot')
+
+clustering_parser.add_argument(
+    '--topN',
+    type=int,
+    default=3,
+    choices=range(1, 10),
+    help='Select top N makers in each cluster for further visualization (default: %(default)s)')
+
+clustering_parser.add_argument(
+    '--mSpatialVar',
+    dest='mSpatialVar',
+    action='store_true',
+    default=False,
+    help='Add "--mSpatialVar" to find spatial variable (default: %(default)s)')
+
+# create the parser for the "Annotation" commond
+annotation_parser = subparsers.add_parser(
+    'Annotation', help='Perform cell annotation by SingleR and celldex')
+annotation_parser.add_argument(
+    '-r', '--Rscript',
+    dest='Rscript',
+    type=str,
+    default="/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript",
+    help='Rscript path (default: %(default)s)')
+
+annotation_parser.add_argument(
+    '-i', '--input',
+    dest='input',
+    type=str,
+    required=True,
+    default=None,
+    help='Input normalized data (*txt.gz)')
+
+annotation_parser.add_argument(
+    '-o', '--out',
+    dest='out',
+    type=str,
+    required=True,
+    default=None,
+    help='Directory to save file')
+
+annotation_parser.add_argument(
+    '--prefix',
+    type=str,
+    default='sample',
+    help='Sample ID, will be used as output prefix and seuratObj ident (default: %(default)s)')
+
+annotation_parser.add_argument(
+    '--ref_name',
+    dest='ref_name',
+    type=str,
+    default='HumanPrimaryCellAtlasData',
+    choices=[
+        'BlueprintEncodeData',
+        'DatabaseImmuneCellExpressionData',
+        'HumanPrimaryCellAtlasData',
+        'ImmGenData',
+        'MonacoImmuneData',
+        'MouseRNAseqData',
+        'NovershternHematopoieticData'],
+    help='Ref database name (default: %(default)s)')
+
+annotation_parser.add_argument(
+    '-c', '--cluster',
+    dest='cluster',
+    type=str,
+    default=None,
+    help='cluster file generated by Seurat workflow (default: %(default)s)')
+
+# create the parser for the "Trajectory" commond
+trajectory_parser = subparsers.add_parser(
+    'Trajectory', help='Perform trajectory analysis by Monocle3')
+trajectory_parser.add_argument(
+    '-r', '--Rscript',
+    dest='Rscript',
+    type=str,
+    default="/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript",
+    help='Rscript path (default: %(default)s)')
+
+trajectory_parser.add_argument(
+    '-i', '--input',
+    dest='input',
+    type=str,
+    required=True,
+    default=None,
+    help='flt_norm_cluster_SeuratObject RDS file')
+
+trajectory_parser.add_argument(
+    '-o', '--out',
+    dest='out',
+    type=str,
+    required=True,
+    default=None,
+    help='Directory to save file')
+
+trajectory_parser.add_argument(
+    '--prefix',
+    type=str,
+    default='sample',
+    help='Sample ID, will be used as output prefix and seuratObj ident (default: %(default)s)')
+
+trajectory_parser.add_argument(
+    '-g', '--gene',
+    dest='gene',
+    type=str,
+    default=None,
+    help='gene name to define root of trajectory (default: %(default)s)')
+
+trajectory_module = trajectory_parser.add_argument_group("optional modules")
+trajectory_module.add_argument(
+    '--mDEG',
+    action='store_true',
+    default=False,
+    help='Add "--mDEG" to allow differential expression analysis (default: %(default)s)')
+
+trajectory_module.add_argument(
+    '--mGCN',
+    action='store_true',
+    default=False,
+    help='Add "--mGCN" to allow gene co-expression analysis (default: %(default)s)')
+
+trajectory_module.add_argument(
+    '--mTop_markers',
+    action='store_true',
+    default=False,
+    help='Add "--mTop_markers" to allow top markers analysis (default: %(default)s)')
+
+# create the parser for the "Enrichment" commond
+enrichment_parser = subparsers.add_parser(
+    'Enrichment', help='Perform functional enrichment analysis by clusterProfiler')
+enrichment_parser.add_argument(
+    '-r', '--Rscript',
+    dest='Rscript',
+    type=str,
+    default="/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript",
+    help='Rscript path (default: %(default)s)')
+
+enrichment_parser.add_argument(
+    '-i', '--input',
+    dest='input',
+    type=str,
+    required=True,
+    default=None,
+    help='Input markerGene filename which generated by Seurat workflow')
+
+enrichment_parser.add_argument(
+    '-o', '--out',
+    dest='out',
+    type=str,
+    required=True,
+    default=None,
+    help='Directory to save file')
+
+enrichment_parser.add_argument(
+    '-s', '--species',
+    dest='species',
+    type=str,
+    default='Human',
+    choices=['Human', 'Mouse'],
+    help='species name (default: %(default)s)')
+
+enrichment_parser.add_argument(
+    '-c', '--cluster',
+    dest='cluster',
+    type=str,
+    default=None,
+    help='Name of clusters for comparing go enrichment (1st colum: cluster name)')
+
+# create the parser for the "TFregulon" commond
+tf_parser = subparsers.add_parser(
+    'TFregulon', help='Perform single-cell regulatory network inference by SCENIC')
+
+tf_parser.add_argument('--GeneMatrix',
+        dest='genematrix',
+        type=str,
+        required=False,
+        help='Gene expression matrix of single cell')
+
+tf_parser.add_argument('--species',
+        dest='species',
+        type=str,
+        required=False,
+        help='human or mouse')
+
+tf_parser.add_argument('--annot',
+        dest='annot',
+        type=str,
+        required=False,
+        help='Cell type annotation file')
+
+tf_parser.add_argument('--TFDataset',
+        dest='tfdataset',
+        type=str,
+        required=False,
+        help='TF dataset')
+tf_parser.add_argument('--TFName',
+       dest='tf',
+       type=str,
+       required=False,
+       help='Provide a TF name')
+tf_parser.add_argument('--NetFile',
+        dest='net',
+        type=str,
+        required=False,
+        help='Co-expression network inferred by pyscenic named \'02.Network.Adj.tsv\' in the outdir')
+
+tf_parser.add_argument('--SCENICloom',
+        dest='ScenicLoom',
+        type=str,
+        required=False,
+        help='Loom file outputed by SCENIC named \'SCENIC.Regulon.AUC.loom \'')
+
+tf_parser.add_argument('--h5ad',
+        dest='h5ad',
+        type=str,
+        required=False,
+        help='h5ad file including AdataExpression and regulonAUC value info named \'Adata.Expression.Regulon.AUC.h5ad\'')
+
+tf_parser.add_argument('--TFreglist',
+       dest='TFreglist',
+       type=str,
+       required=False,
+       help='TF regulons list file;One column')
+
+tf_parser.add_argument('--outdir',
+        dest='outdir',
+        type=str,
+        required=True,
+        help='Output result directory')
+
+tf_parser.add_argument('--cpu',
+        dest='cpu',
+        type=str,
+        required=False,
+        help='Cpu numbers')
+
+
+# create the parser for the "Deconvolute" commond
+deconvolute_parser = subparsers.add_parser(
+    'DeconvSpot', help='Perform deconvolution of cell types by SPOTlight')
+deconvolute_parser.add_argument('--Scdata',
+        dest='scdata',
+        type=str,
+        required=True,
+        help='Input seurate rds single-cell data after cell cluster annotation ')
+
+deconvolute_parser.add_argument('--Stdata',
+        dest='stdata',
+        type=str,
+        required=True,
+        help='Input seurate rds spatial transcriptome data')
+
+deconvolute_parser.add_argument('--piescale',
+        dest='piescale',
+        type=str,
+        required=False,
+        default=None,
+        help='pie spot size ')
+
+deconvolute_parser.add_argument('--ClusterFile',
+        dest='clusterFile',
+        type=str,
+        required=False,
+        default=None,
+        help='View a set of specific cluster locations')
+
+deconvolute_parser.add_argument('--Rscript',
+        dest='rscript',
+        type=str,
+        required=False,
+        default='/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript',
+        help='The path of Rscript')
+
+deconvolute_parser.add_argument('--outdir',
+        dest='outdir',
+        type=str,
+        required=True,
+        help='Output file into this directory')
+
+# create the parser for the "CellCellInteraction" commond
+cci_parser = subparsers.add_parser('CellCellInteraction', help='Perform cell-cell communication analysis by CellChat')
+cci_parser.add_argument(
+    '-r', '--Rscript',
+    dest='Rscript',
+    type=str,
+    default="/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript",
+    help='Rscript path')
+
+cci_parser.add_argument(
+    '-i', '--input',
+    dest='input',
+    type=str,
+    required=True,
+    default=None,
+    help='Input raw data file (*.txt.gz)')
+
+cci_parser.add_argument(
+    '-s', '--species',
+    dest='species',
+    type=str,
+    default='Human',
+    choices=['Human', 'Mouse'],
+    help='species name (default: %(default)s)')
+
+cci_parser.add_argument(
+    '-m', '--meta',
+    dest='meta',
+    type=str,
+    required=True,
+    help='Cell labels (Recommand the cell types results generated by Annotation module (default: %(default)s)')
+
+cci_parser.add_argument(
+    '-o', '--out',
+    dest='out',
+    type=str,
+    required=True,
+    default=None,
+    help='Directory to save file')
+
+cci_parser.add_argument(
+    '--prefix',
+    type=str,
+    default='sample',
+    help='Sample ID, will be used as output prefix and seuratObj ident (default: %(default)s)')
+
+
+# create the parser for the "SpatialCluster" commond
+spatial_cluster_parser = subparsers.add_parser('SpatialCluster', help='Perform spatial cluster by BayesSpaces')
+spatial_cluster_parser.add_argument('--Stdata',
+        dest='Stdata',
+        type=str,
+        required=True,
+        help='Seurat rds after clustering  ')
+
+spatial_cluster_parser.add_argument('--clusterNumber',
+        dest='clusterNumber',
+        type=str,
+        required=False,
+        help='Set cluster number of BayesSpace spatial cluster')
+
+spatial_cluster_parser.add_argument('--iterations',
+        dest='iterations',
+        type=str,
+        required=True,
+        help='iterations number of MCMC')
+
+spatial_cluster_parser.add_argument('--outdir',
+        dest='outdir',
+        type=str,
+        required=True,
+        help='directory to save result file')
+
+spatial_cluster_parser.add_argument('--Rscript',
+        dest='rscript',
+        type=str,
+        required=False,
+        default='/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript',
+        help='The path of Rscript')
+
+
+# create the parser for the "SpatialPattern" commond
+spatial_pattern_parser = subparsers.add_parser('SpatialPatternGene', help='Statistical analysis of spatial expression pattern by SPARK')
+spatial_pattern_parser.add_argument('--input',
+        dest='input',
+        type=str,
+        required=True,
+        help='Seurat rds after clustering')
+
+spatial_pattern_parser.add_argument('--genefile',
+        dest='genefile',
+        type=str,
+        required=False,
+        help='One column file including genes you want to show')
+
+spatial_pattern_parser.add_argument('--outdir',
+        dest='outdir',
+        type=str,
+        required=True,
+        help='directory to save result file')
+
+spatial_pattern_parser.add_argument('--Rscript',
+        dest='rscript',
+        type=str,
+        required=False,
+        default='/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript',
+        help='The path of Rscript')
+
+
+# create the parser for the "AnnotscCATCH" commond
+anno_sccatch_parser = subparsers.add_parser('AnnotscCATCH', help='Perform cell annotation by scCATCH')
+anno_sccatch_parser.add_argument('--input',
+        dest='input',
+        type=str,
+        required=True,
+        help='rds file of gene expression ')
+
+anno_sccatch_parser.add_argument('--species',
+        dest='species',
+        type=str,
+        required=True,
+        help='Human or Mouse')
+
+anno_sccatch_parser.add_argument('--tissue',
+        dest='tissue',
+        type=str,
+        required=True,
+        help='tiisue type: https://github.com/ZJUFanLab/scCATCH/wiki')
+
+anno_sccatch_parser.add_argument('--cancer',
+        dest='cancer',
+        type=str,
+        required=False,
+        help='cancer type:https://github.com/ZJUFanLab/scCATCH/wiki')
+
+anno_sccatch_parser.add_argument('--outdir',
+        dest='outdir',
+        type=str,
+        required=True,
+        help='directory to save result file')
+
+anno_sccatch_parser.add_argument('--Rscript',
+        dest='rscript',
+        type=str,
+        required=False,
+        default='/ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/R411/bin/Rscript',
+        help='The path of Rscript')
+
+
+# set default function
+qc_parser.set_defaults(func=_qccontrol)
+clustering_parser.set_defaults(func=_clustering)
+annotation_parser.set_defaults(func=_annotation)
+trajectory_parser.set_defaults(func=_trajectory)
+enrichment_parser.set_defaults(func=_enrichment)
+tf_parser.set_defaults(func=_tf)
+deconvolute_parser.set_defaults(func=_deconvolute)
+cci_parser.set_defaults(func=_cci)
+
+spatial_cluster_parser.set_defaults(func=_spatialcluster)
+spatial_pattern_parser.set_defaults(func=_spatialpattern)
+anno_sccatch_parser.set_defaults(func=_sccatch)
+
+
+args = parser.parse_args()
+
+# args.func()
+# execute function
+try:
+    args.func()
+except AttributeError:
+    parser.print_help(sys.stderr)
+    sys.exit(1)
