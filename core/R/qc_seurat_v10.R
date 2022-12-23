@@ -57,7 +57,7 @@ print(opts)
 
 ## Functions
 
-#' define function to transform *.gem file to seurat object
+#' define function to transform *.gem file to seurat object(inspired by zhangrui7@genomics.cn；c-yuhao@genomics.cn；zouxuanxuan@genomics.cn)
 gem_to_seuratObject <- function(data, prefix = 'sample', binsize = opts$binsize){
     #' read the gem file  
     data <- fread(file = data)
