@@ -1,0 +1,247 @@
+library(optparse)
+library(Matrix)
+library(data.table)
+library(Seurat)
+library(dplyr)
+library(SPOTlight)
+library(igraph)
+library(RColorBrewer)
+library(ggplot2)
+suppressMessages(require(imager))
+suppressMessages(require(png))
+suppressMessages(require(jpeg))
+suppressMessages(require(grid))
+
+packageVersion('SPOTlight')
+
+### 读入数据
+Scdata<- readRDS('/jdfssz1/ST_TSCBI/PROJECT_temp/PROJECT/SEPSIS/Kidney/GSE107585_Science_scRNA/GSE107585_Mouse_kidney_single_cell.rds')
+Stdata<-readRDS('/jdfssz1/ST_TSCBI/PROJECT_temp/PROJECT/SEPSIS/Kidney/12h_1_SS200000141TL_C4/bin100/QC/kidney_100_filt_norm_seuratObject.rds')
+#clusterFile=opts$clusterFile
+piescale= as.numeric('0.3')
+img_path='/hwfssz5/ST_EARTH/P18Z19700N0069/lixiaowei3/lixiaowei3/program/zheer_hippocampus/huangke/13.brain.project/09.deconvSpot/01.deconv.E4/blank.size.png'
+outdir='/jdfssz1/ST_TSCBI/PROJECT_temp/PROJECT/SEPSIS/Kidney/12h_1_SS200000141TL_C4/deconv_science'
+# 若目录下没有输出目录文件夹,新建输出文件夹
+if (!is.null(outdir)){
+	    if (! file.exists(outdir)){
+	        dir.create(outdir, recursive = TRUE)}
+}
+
+head(Scdata) # to see is there annotated cell type in metadata of scRNA
+
+### add cell type to Scdata
+
+#Scdata$CellType <- unlist(cluster_annotations[Scdata$integrated_snn_res.1])
+Idents(object = Scdata) <- Scdata@meta.data$CellType
+#Scdata<-subset(x=Scdata, idents=c('S1','S2','S3')) # 为加快测试，只使用3个细胞类型,实际情况按需选择细胞类型，或者注释掉以保留所有细胞类型
+
+### 解卷积，根据单细胞cell marker在每个细胞类型中的topic，解析spot细胞组成类型
+# 寻找单细胞数据的cell marker
+Seurat::Idents(object = Scdata) <- Scdata@meta.data$CellType
+cluster_markers_all <- Seurat::FindAllMarkers(object = Scdata, 
+                                              assay = "RNA",
+                                              slot = "data", # 需要有这个slot，即normalization后的数据
+                                              verbose = TRUE, 
+                                              only.pos = TRUE,
+#                                              logfc.threshold = 0.5 # 为了快速测试流程，设置为0.5，实际建议不设置，默认0.25，能纳入更多基因
+                                             )
+
+saveRDS(object = cluster_markers_all,file.path(outdir,'03.ScDATA.markers.rds'))
+#cluster_markers_all=readRDS(file.path(outdir,'03.ScDATA.markers.rds')) # 若后续运行有问题，而上面部分无问题，可以从此开始，避免重复运行FindAllMarkers
+
+# split cell indices by identity
+idx <- split(seq(ncol(Scdata)), Scdata$CellType)
+# downsample to 100 cells per identity & subset
+# We are using 5 here to speed up the process but set to 75-100 for your real life analysis
+n_cells <- 100     # 一般情况下设置100
+cs_keep <- lapply(idx, function(i) {
+    n <- length(i)
+    if (n < n_cells)
+        n_cells <- n
+    sample(i, n_cells)
+})
+Scdata <- Scdata[, unlist(cs_keep)]
+    
+# 根据单细胞数据，单细胞cell marker数据，推断空间数据每个spot的细胞组成
+spotlight_ls <- SPOTlight(
+    x = Scdata,
+    y = Stdata,
+    groups = Scdata@meta.data$CellType,
+    mgs = cluster_markers_all,
+    weight_id = "avg_log2FC",
+    group_id = "cluster",
+    gene_id = "gene")
+#' 存储解卷积结果
+saveRDS(object = spotlight_ls, file = file.path(outdir,"04.spotlight_ls.rds"))
+
+### 根据解卷积结果文件，将画图信息整理进stdata中，以及获取簇名
+spotlight_ls=readRDS(file.path(outdir,'04.spotlight_ls.rds'))
+nmf_mod <- spotlight_ls$NMF
+decon_mtrx_sub <- spotlight_ls$mat
+res_ss<-spotlight_ls$res_ss
+decon_mtrx <- cbind(decon_mtrx_sub, res_ss)
+
+decon_df <- decon_mtrx %>%
+	data.frame() %>%
+    tibble::rownames_to_column("barcodes")
+  
+Stdata@meta.data <- Stdata@meta.data %>%
+    tibble::rownames_to_column("barcodes") %>%
+    dplyr::left_join(decon_df, by = "barcodes") %>%
+    tibble::column_to_rownames("barcodes") 
+cell_types_all <- colnames(decon_mtrx_sub)
+print(cell_types_all)
+
+### 画图函数，Plot  figure  acoording to deconv result，另外生成一个meta data的tsv文件
+Deconv_Scatterpie<-function(se_obj,cell_types_all,cell_types_interest,pie_scale){
+     scatterpie_alpha = 1
+     pie_scale = pie_scale
+    
+    # Check variables
+    if (!is(se_obj, "Seurat")) stop("ERROR: se_obj must be a Seurat object!")
+    if (! is(cell_types_all, "vector")) stop("ERROR: cell_types_all must be a vector/list object!")
+    if (!is.character(img_path)) stop("ERROR: must be a character string!")
+    if (!(is(cell_types_interest, "vector") | is.null(cell_types_interest))) stop("ERROR: cell_types_interest must be a vector/list object or NULL!")
+    if (!is.numeric(scatterpie_alpha)) stop("ERROR: scatterpie_alpha must be numeric between 0 and 1!")
+    if (!is.numeric(pie_scale)) stop("ERROR: pie_scale must be numeric between 0 and 1!")
+    
+    metadata_ds <- data.frame(se_obj@meta.data)
+    colnames(metadata_ds) <- colnames(se_obj@meta.data)
+    
+    if (is.null(cell_types_interest)) {
+      cell_types_interest <- cell_types_all
+    }
+    
+    # If not all cell types are in the cell types of interest we only want to keep those spots which have at least one of the cell types of interest
+    if (!all(cell_types_all %in% cell_types_interest)) {
+      print(cell_types_interest)
+      metadata_ds <- metadata_ds %>%
+        tibble::rownames_to_column("barcodeID") %>%
+        dplyr::mutate(rsum = base::rowSums(.[, cell_types_interest,
+                                             drop = FALSE])) %>%
+        dplyr::filter(rsum != 0) %>%
+        dplyr::select("barcodeID") %>%
+        dplyr::left_join(metadata_ds %>% tibble::rownames_to_column("barcodeID"),
+                         by = "barcodeID") %>%
+        tibble::column_to_rownames("barcodeID")
+    }
+    
+    ## If slice is not selected set it to the first element in the list of slices
+    #  if (is.null(slice) | (!is.null(slice) && !slice %in% names(se_obj@images))) {
+      slice <- names(se_obj@images)[1]
+    #   warning(sprintf("Using slice %s", slice))
+    # }
+    
+    ## Preprocess data
+    spatial_coord <- data.frame(se_obj@images$slice@coordinates) %>%
+      tibble::rownames_to_column("barcodeID") %>%
+      dplyr::mutate(
+        imagerow_scaled =
+          imagerow * se_obj@images$slice@scale.factors$lowres,
+        imagecol_scaled =
+          imagecol * se_obj@images$slice@scale.factors$lowres) %>%
+      dplyr::inner_join(metadata_ds %>% tibble::rownames_to_column("barcodeID"),
+                        by = "barcodeID")
+    
+    ### Load histological image into R
+    #### Extract file format, JPEG or PNG
+    img_frmt <- base::tolower(stringr::str_sub(img_path, -4, -1))
+    
+    if(img_frmt %in% c(".jpg", "jpeg")) {
+      img <- jpeg::readJPEG(img_path)
+    } else if (img_frmt == ".png") {
+      img <- png::readPNG(img_path)
+    }
+    
+    # Convert image to grob object
+    img_grob <- grid::rasterGrob(img,
+                                 interpolate = FALSE,
+                                 width = grid::unit(1, "npc"),
+                                 height = grid::unit(1, "npc"))
+    
+    
+    #if (cell_types_all[1]=='0'){
+    #  cell_type_col=paste("X", (1:(length(cell_types_all))-1), sep = "")
+    #}else{
+    #  cell_type_col=cell_types_all
+    #}
+    # color_list <- c('#FB9A99','darkturquoise','#FDBF6F','deeppink1','orchid1','#A52A2A', '#E31A1C', 'green4', '#6A3D9A', '#FF7F00', 'black', 'gold1', 
+    #                 'skyblue2', 'palegreen2', '#CAB2D6', 'gray70', 'khaki2', 
+    #                 'maroon', 'steelblue4', 'green1', 'yellow4', 'yellow3','darkorange4','dodgerblue2')
+
+    qual_col_pals <- brewer.pal.info[brewer.pal.info$category == 'qual',]
+    color_list <- unique(unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))) 
+    all_col=length(colnames(spatial_coord))
+    colnames(spatial_coord)[(all_col-length(cell_types_all)):(all_col-1)]=cell_types_all
+
+    #colnames(spatial_coord)[19:(19+length(cell_types_all)-1)]=cell_types_all
+    write.table(spatial_coord,file=file.path(outdir,"spatial_coord.prop.pip.res.tsv"),quote=F,row.names = F,sep='\t')
+    
+    ## Plot spatial scatterpie plot
+    decon_mtrx_sub[decon_mtrx_sub < 0.08] <- 0  # 将一些spot中比例极低的细胞类型过滤掉
+    scatterpie_plt <- suppressMessages(
+      ggplot2::ggplot() +
+        ggplot2::annotation_custom(
+          grob = img_grob,
+          xmin = 0,
+          xmax = ncol(img),
+          ymin = 0,
+          ymax = -nrow(img)) +
+        scatterpie::geom_scatterpie(
+          data = spatial_coord,
+          ggplot2::aes(x = imagecol_scaled,
+                       y = imagerow_scaled),
+          cols = cell_types_all ,
+          color = NA,
+          alpha = scatterpie_alpha,
+          pie_scale = pie_scale)+scale_fill_manual(values=color_list[1:length(cell_types_all)])+
+        ggplot2::scale_y_reverse() +
+        #ggplot2::ylim(nrow(img), 0) +
+        #ggplot2::xlim(0, ncol(img)) +
+        cowplot::theme_half_open(11, rel_small = 1) +
+        ggplot2::theme_void() +
+        ggplot2::coord_fixed(ratio = 1,
+                             xlim = NULL,
+                             ylim = NULL,
+                             expand = TRUE,
+                             clip = "on"))
+    return(scatterpie_plt)
+}
+
+### 运行画饼图的函数
+p1=Deconv_Scatterpie(Stdata,cell_types_all,NULL,piescale)  
+ggsave(p1,file=file.path(outdir,'05.StData.All.cluster.pie.pdf'),width=10,height=8)
+
+### 其他图
+p2=plotTopicProfiles(
+    x = nmf_mod,
+    y = Scdata@meta.data$CellType,
+    facet = FALSE,
+    min_prop = 0.01,
+    ncol = 1) +
+    theme(aspect.ratio = 1)
+ggsave(p2,file=file.path(outdir,'06.ScData.TopicProfiles.1.pdf'),width=10,height=12)
+
+p3=plotTopicProfiles(
+    x = nmf_mod,
+    y = Scdata@meta.data$CellType,
+    facet = TRUE,
+    min_prop = 0.01,
+    ncol = 6)
+ggsave(p3,file=file.path(outdir,'06.ScData.TopicProfiles.2.pdf'),width=10,height=12)
+
+p4=plotCorrelationMatrix(decon_mtrx)
+ggsave(p4,file=file.path(outdir,'07.Correlation.pdf'),width=10,height=10)
+
+p5=plotInteractions(decon_mtrx, "heatmap")
+ggsave(p5,file=file.path(outdir,'08.CoLocalization.heatmap.pdf'),width=10,height=10)
+
+p6=plotInteractions(decon_mtrx, "network")
+ggsave(p6,file=file.path(outdir,'08.CoLocalization.network.pdf'),width=10,height=10)
+
+#p7=ggcells(Stdata, aes(x, y, color = res_ss)) +
+#    geom_point() +
+#    scale_color_viridis_c() +
+#    coord_fixed() +
+#    theme_bw()
+#ggsave(p7,file=file.path(outdir,'09.Stdata.Residuals.pdf'),width=10,height=10)
