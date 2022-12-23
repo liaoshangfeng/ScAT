@@ -7,8 +7,7 @@ Here, we present Stereo-seq and scRNA-seq Analysis Toolkit (ScAT), a user-friend
 
 
 <p align="center" width="100%">
-    <img width="33%" src="https://github.com/liaoshangfeng/ScAT/blob/main/example/ScAT_overview.jpg"
-                     alt="ScAT Overview"> 
+    <img width="50%" src="https://github.com/liaoshangfeng/ScAT/blob/main/example/ScAT_overview.jpg" alt="" title="ScAT Overview"> 
 </p>
 
 # Dependences
