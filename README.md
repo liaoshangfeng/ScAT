@@ -1,1 +1,3 @@
 ScAT Usage
+
+ScAT -h
