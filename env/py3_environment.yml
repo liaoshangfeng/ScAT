@@ -511,4 +511,3 @@ dependencies:
       - zarr==2.11.3
       - zict==2.0.0
       - zipp==3.4.1
-prefix: /ldfssz1/ST_OCEAN/USER/liaoshangfeng/software/anaconda3/envs/py3
