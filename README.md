@@ -31,8 +31,11 @@ bash install_env.sh
 
 # Example
 
-1. [Tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/example/ScAT_Vignette.ipynb)
+1. [Vignette](https://github.com/liaoshangfeng/ScAT/blob/main/example/ScAT_Vignette.ipynb)
 
+2. [Mouse kidney stereo-seq data analysisTutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScAT_mouse_kidney_tutorial_F2.ipynb)
+
+3. [Mouse kidney snRAN-seq data analysisTutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScA_mouse_kidney_sc_tutorial.ipynb)
 
 # Disclaimer
 
