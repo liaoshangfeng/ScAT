@@ -19,7 +19,7 @@ Here, we present Stereo-seq and scRNA-seq Analysis Toolkit (ScAT), a user-friend
 
 # Usage
 
-```bash
+```console
 wget https://github.com/liaoshangfeng/ScAT
 cd ScAT/bin
 python3 ScAT -h
@@ -27,7 +27,7 @@ python3 ScAT -h
 
 # Environment
 
-```bash
+```console
 conda create -n ScAT
 wget https://github.com/liaoshangfeng/ScAT/blob/main/env/install_env.sh
 bash install_env.sh
