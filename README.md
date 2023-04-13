@@ -19,23 +19,27 @@ Here, we present Stereo-seq and scRNA-seq Analysis Toolkit (ScAT), a user-friend
 
 # Usage
 
+```
+wget https://github.com/liaoshangfeng/ScAT
+cd ScAT/bin
 - ScAT -h
+```
 
-# Installtaion
+# Environment
 
+```
 conda create -n ScAT
-
 wget https://github.com/liaoshangfeng/ScAT/blob/main/env/install_env.sh
-
 bash install_env.sh
+```
 
 # Example
 
 1. [Vignette](https://github.com/liaoshangfeng/ScAT/blob/main/example/ScAT_Vignette.ipynb)
 
-2. [Mouse kidney stereo-seq data analysisTutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScAT_mouse_kidney_tutorial_F2.ipynb)
+2. [Mouse kidney stereo-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScAT_mouse_kidney_tutorial_F2.ipynb)
 
-3. [Mouse kidney snRAN-seq data analysisTutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScA_mouse_kidney_sc_tutorial.ipynb)
+3. [Mouse kidney snRAN-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScA_mouse_kidney_sc_tutorial.ipynb)
 
 # Disclaimer
 
