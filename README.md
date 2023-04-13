@@ -13,8 +13,8 @@ Here, we present Stereo-seq and scRNA-seq Analysis Toolkit (ScAT), a user-friend
 # Dependences
 
 [![numpy-1.21.3](https://img.shields.io/badge/numpy-1.21.3-red)](https://github.com/numpy/numpy)
-[![pandas-1.2.4](https://img.shields.io/badge/pandas-1.2.4-lightgrey)](https://github.com/pandas-dev/pandas)
-[![scanpy-1.8.1](https://img.shields.io/badge/scanpy-1.8.1-blue)](https://github.com/theislab/scanpy)
+[![pandas-1.2.6](https://img.shields.io/badge/pandas-1.2.6-lightgrey)](https://github.com/pandas-dev/pandas)
+[![scanpy-1.9.1](https://img.shields.io/badge/scanpy-1.8.1-blue)](https://github.com/theislab/scanpy)
 
 
 # Usage
