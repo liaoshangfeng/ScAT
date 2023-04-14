@@ -19,11 +19,7 @@ Here, we present Stereo-seq and scRNA-seq Analysis Toolkit (ScAT), a user-friend
 
 # Usage
 ----------
-```bash
-wget https://github.com/liaoshangfeng/ScAT
-cd ScAT/bin
-python3 ScAT -h
-```
+[Usage](https://github.com/liaoshangfeng/ScAT/blob/main/ScAT_vignette.md)```
 
 # Installation & Environment
 ----------
@@ -38,7 +34,6 @@ bash install_env.sh
 
 # Example
 ----------
-1. [Vignette](https://github.com/liaoshangfeng/ScAT/blob/main/example/ScAT_Vignette.ipynb)
 
 2. [Mouse kidney stereo-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScAT_mouse_kidney_tutorial_F2.ipynb)
 
