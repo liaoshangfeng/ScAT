@@ -35,9 +35,17 @@ bash install_env.sh
 # Example
 ----------
 
-2. [Mouse kidney stereo-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScAT_mouse_kidney_tutorial_F2.ipynb)
+1. [Mouse kidney stereo-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScAT_mouse_kidney_tutorial_F2.ipynb)
 
-3. [Mouse kidney snRAN-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScA_mouse_kidney_sc_tutorial.ipynb)
+2. [Mouse kidney snRAN-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScA_mouse_kidney_sc_tutorial.ipynb)
+
+# Additional resources
+----------
+
+1. [Multiple slices integration analysis code](https://github.com/liaoshangfeng/ScAT/tree/main/src/MultiSlicesAnalysis)
+
+2. [IO code](https://github.com/liaoshangfeng/ScAT/tree/main/src/IO)
+
 
 # Disclaimer
 ----------
