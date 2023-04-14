@@ -19,7 +19,7 @@ Here, we present Stereo-seq and scRNA-seq Analysis Toolkit (ScAT), a user-friend
 
 # Usage
 ----------
-[Usage](https://github.com/liaoshangfeng/ScAT/blob/main/ScAT_vignette.md)```
+Full documentation for ScAT is available on [Read the Docs](https://github.com/liaoshangfeng/ScAT/blob/main/ScAT_vignette.md)
 
 # Installation & Environment
 ----------
