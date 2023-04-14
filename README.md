@@ -25,9 +25,13 @@ cd ScAT/bin
 python3 ScAT -h
 ```
 
-# Environment
+# Installation & Environment
+----------
 
-```console
+```bash
+## Download ScAT source code
+git clone https://github.com/liaoshangfeng/ScAT.git
+## Create environment
 conda create -n ScAT
 wget https://github.com/liaoshangfeng/ScAT/blob/main/env/install_env.sh
 bash install_env.sh
