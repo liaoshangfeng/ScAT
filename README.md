@@ -1,4 +1,4 @@
-# ScAT
+# ScAT: Stereo-seq and scRNA-seq Analysis Toolkit
 
 [![python >3.8.8](https://img.shields.io/badge/python-3.8.8-brightgreen)](https://www.python.org/) 
 
