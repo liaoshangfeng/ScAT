@@ -18,11 +18,11 @@ Here, we present Stereo-seq and scRNA-seq Analysis Toolkit (ScAT), a user-friend
 
 
 # Usage
-----------
+
 Full documentation for ScAT is available on [Read the Docs](https://github.com/liaoshangfeng/ScAT/blob/main/ScAT_vignette.md)
 
 # Installation & Environment
-----------
+
 ```bash
 ## Download ScAT source code
 git clone https://github.com/liaoshangfeng/ScAT.git
@@ -33,27 +33,31 @@ bash install_env.sh
 ```
 
 # Example
-----------
 
 1. [Mouse kidney stereo-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScAT_mouse_kidney_tutorial_F2.ipynb)
 
 2. [Mouse kidney snRAN-seq data analysis tutorial](https://github.com/liaoshangfeng/ScAT/blob/main/tutorial/ScA_mouse_kidney_sc_tutorial.ipynb)
 
 # Additional resources
-----------
+
 
 1. [Multiple slices integration analysis code](https://github.com/liaoshangfeng/ScAT/tree/main/src/MultiSlicesAnalysis)
 
 2. [IO code](https://github.com/liaoshangfeng/ScAT/tree/main/src/IO)
 
+3. Datasets for `ScAT TFregulon` and `ScAT Annotation`
+```bash
+## Please download docs.tar.gz from here：https://pan.genomics.cn/ucdisk/s/uqyeee.
+tar zxvf docs.tar.gz -C ${scat_dir}
+```
 
 # Disclaimer
-----------
+
 This tool is for research purpose and not approved for clinical use.
 
 
 # Coypright
-----------
+
 This tool is developed in BGI research.
 
 The copyright holder for this project is BGI research.

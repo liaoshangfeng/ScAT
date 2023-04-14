@@ -1,7 +1,6 @@
 # ScAT: Stereo-seq and scRNA-seq Analysis Toolkit
 
 ## Overview
-----------
 
 ```bash
 > ${scat_dir}/bin/ScAT -h
@@ -39,7 +38,6 @@ Use ScAT {command} -h to get help on individual commands
 ```
 
 ## Installation & Environment
-----------
 ```bash
 ## Download ScAT source code
 git clone https://github.com/liaoshangfeng/ScAT.git
@@ -50,7 +48,6 @@ bash install_env.sh
 ```
 
 ## Usage
-----------
 
 ### ScAT QcControl
 
@@ -123,7 +120,7 @@ filter arguements:
 
 ```
 
-**TODO** geneColumn = 1 when using C4 data
+**Note** geneColumn = 1 when using C4 data
 
 ### ScAT Clustering
 
