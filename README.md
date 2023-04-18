@@ -28,7 +28,7 @@ Full documentation for ScAT is available on [Read the Docs](https://github.com/l
 git clone https://github.com/liaoshangfeng/ScAT.git
 ## Create environment
 conda create -n ScAT
-wget https://github.com/liaoshangfeng/ScAT/blob/main/env/install_env.sh
+wget https://raw.githubusercontent.com/liaoshangfeng/ScAT/main/env/install_env.sh
 bash install_env.sh
 ```
 
