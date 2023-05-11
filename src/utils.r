@@ -12,8 +12,9 @@ visium_to_slideseq <- function(sceuratObject){
     return(sceuratObject)
 }
 
-## rotate 2d coordinates　https://math.stackexchange.com/questions/195141/rotating-2d-coordinates
+
 rotate_2D_coordinate <- function(coordinate_mat, angle){
+    ## Description: Rotate 2d coordinates　https://math.stackexchange.com/questions/195141/rotating-2d-coordinates
     ## param coordinate_mat: x,y coordinate matrix
     ## param angle: angle
     ## Usage: mat <- rotate_2D_coordinate(coordinate_mat = mat, angle = 30)
