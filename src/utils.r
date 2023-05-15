@@ -36,6 +36,27 @@ rotate_2D_coordinate <- function(coordinate_mat, angle){
 # 1.imagerow:Y, imagecol:X
 # 2.对imagerow做颠倒
 # coord$x_r <- max(coord$x) - coord$x + min(coord$x)
+update_pseuImages <- function(seu){
+    ## update images by seu@meta.data, must contain x, y of expression matrix
+    ## Usage: seu <- update_pseuImages(seu)
+    
+    DefaultImage <- function(object) {
+      object <- UpdateSlots(object = object)
+      images <- Images(object = object, assay = DefaultAssay(object = object))
+      if (length(x = images) < 1) {
+        images <- Images(object = object)
+      }
+      return(images[[1]])
+    }
+    
+    image <- DefaultImage(seu)
+    seu@images[[image]]@coordinates <- seu@meta.data[,c('y', 'x')]
+    colnames(seu@images[[image]]@coordinates) <- c('imagerow', 'imagecol')
+    seu@images[[image]]@coordinates$imagerow <- max(seu@images[[image]]@coordinates$imagerow) - seu@images[[image]]@coordinates$imagerow + min(seu@images[['slice1']]@coordinates$imagerow)
+    
+    return(seu)
+}
+
 
 
 if (FALSE){
