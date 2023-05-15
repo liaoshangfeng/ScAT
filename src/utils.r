@@ -28,3 +28,43 @@ rotate_2D_coordinate <- function(coordinate_mat, angle){
     rot_a <- t(sapply(1:nrow(coordinate_mat), function(i){rot_mat  %*% coordinate_mat[i,]})) 
     return (rot_a)
 }
+
+
+## 10x Visium images object
+# 10X HE相对于表达矩阵是颠倒的，如果做伪图，需要注意。另外imagerow:Y, imagecol:X
+# 表达矩阵x-y保持不变，改变image的矩阵，具体
+# 1.imagerow:Y, imagecol:X
+# 2.对imagerow做颠倒
+# coord$x_r <- max(coord$x) - coord$x + min(coord$x)
+
+
+if (FALSE){
+DefaultImage <- function(object) {
+  object <- UpdateSlots(object = object)
+  images <- Images(object = object, assay = DefaultAssay(object = object))
+  if (length(x = images) < 1) {
+    images <- Images(object = object)
+  }
+  return(images[[1]])
+}
+
+    
+image <- DefaultImage(seu)
+seu@images[[image]]@coordinates <- seu@meta.data[,c('y', 'x')]
+colnames(seu@images[[image]]@coordinates) <- c('imagerow', 'imagecol')
+seu@images[[image]]@coordinates$imagerow <- max(seu@images[[image]]@coordinates$imagerow) - seu@images[[image]]@coordinates$imagerow + min(seu@images[['slice1']]@coordinates$imagerow)
+
+    
+    
+p1 <- SpatialFeaturePlot(seu, features =  'Spp1', pt.size.factor = 1, 
+                   images = NULL,  stroke = NA, alpha = c(1, 1)) + 
+    theme_cowplot()+
+    coord_fixed()
+
+
+p2 <- ggplot(seu@meta.data, aes(x = x, y =y))+
+    geom_point(shape = 19, size = 0.1)+
+    theme_cowplot()+
+    coord_fixed()
+
+}
